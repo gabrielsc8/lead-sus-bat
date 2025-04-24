@@ -1,4 +1,3 @@
-// components/Etapa2.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -24,6 +23,7 @@ interface Etapa2Props {
 
 export function Etapa2({ form, handleChange, onBack, onSubmit }: Etapa2Props) {
   const [showLgpd, setShowLgpd] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const isValid = form.camiseta && form.tipoAula && form.aceiteLgpd;
 
@@ -108,12 +108,22 @@ export function Etapa2({ form, handleChange, onBack, onSubmit }: Etapa2Props) {
         >
           Voltar
         </button>
+
         <button
-          onClick={onSubmit}
-          disabled={!isValid}
-          className={`w-1/2 font-semibold rounded-2xl py-3 px-5 transition cursor-pointer ${isValid ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+          onClick={async () => {
+            if (loading || !isValid) return;
+            setLoading(true);
+            await onSubmit();
+            setLoading(false);
+          }}
+          disabled={!isValid || loading}
+          className={`w-1/2 font-semibold rounded-2xl py-3 px-5 transition ${
+            !isValid || loading
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'
+          }`}
         >
-          Enviar
+          {loading ? 'Enviando...' : 'Enviar'}
         </button>
       </div>
     </motion.div>
