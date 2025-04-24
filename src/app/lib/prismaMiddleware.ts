@@ -1,12 +1,14 @@
-import { Prisma } from "@prisma/client";
+import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
 
-export const hashPasswordMiddleware: Prisma.Middleware = async (params, next) => {
-  if (params.model === 'User' && params.action === 'create') {
-    const userData = params.args.data;
-    if (userData?.password) {
-      userData.password = await bcrypt.hash(userData.password, 10);
-    }
-  }
-  return next(params);
-};
+export async function createUser(data: { name: string; email: string; password: string }) {
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+
+  return prisma.user.create({
+    data: {
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
+    },
+  });
+}
