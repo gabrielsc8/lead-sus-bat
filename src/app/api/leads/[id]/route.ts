@@ -2,51 +2,52 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/prisma';
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const lead = await prisma.lead.findUnique({
-      where: { id: Number(params.id) },
-    });
+  const { id } = await params;
 
-    if (!lead) {
-      return NextResponse.json({ error: 'Lead não encontrado' }, { status: 404 });
-    }
+  const lead = await prisma.lead.findUnique({
+    where: { id: Number(id) },
+  });
 
-    return NextResponse.json(lead);
-  } catch (error) {
-    return NextResponse.json({ error: 'Erro ao buscar lead' }, { status: 500 });
+  if (!lead) {
+    return NextResponse.json({ error: 'Lead não encontrado' }, { status: 404 });
   }
+
+  return NextResponse.json(lead);
 }
 
 export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const data = await req.json();
+  const { id } = await params;
+  const data = await request.json();
 
   try {
     const updated = await prisma.lead.update({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
       data,
     });
     return NextResponse.json(updated);
   } catch (error) {
-    return NextResponse.json({ error: 'Erro ao atualizar lead' }, { status: 400 });
+    return NextResponse.json({ error: 'Falha ao atualizar lead' }, { status: 400 });
   }
 }
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
+
   try {
     await prisma.lead.delete({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
     });
     return NextResponse.json({ message: 'Lead excluído com sucesso' });
   } catch (error) {
-    return NextResponse.json({ error: 'Erro ao excluir lead' }, { status: 400 });
+    return NextResponse.json({ error: 'Falha ao excluir lead' }, { status: 400 });
   }
 }
