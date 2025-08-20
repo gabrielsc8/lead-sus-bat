@@ -68,10 +68,9 @@ export function Etapa2({ form, handleChange, onBack, onSubmit }: Etapa2Props) {
         required
       >
         <option value="">Selecione</option>
-        <option value="Quarta-Feira - 25/06 - 19:30">Aula Presencial (Quarta-Feira - 25/06 - 19:30)</option>
-        <option value="Sexta-feira - 27/06 - 19:30">Aula Presencial (Sexta-feira - 27/06 - 19:30)</option>
-        <option value="Terca-Feira - 01/07 - 19:30">Aula Presencial (Terca-Feira - 01/07 - 19:30)</option>
-        <option value="Sexta-Feira - 04/07 - 19:30">Aula Presencial (Sexta-Feira - 04/07 - 19:30)</option>
+        <option value="Sexta-Feira - 22/08 - 19:30">Aula Presencial (Sexta-Feira - 22/08 - 19:30)</option>
+        <option value="Quarta-feira - 27/08 - 19:30">Aula Presencial (Quarta-feira - 27/08 - 19:30)</option>
+        <option value="Terca-Feira - 29/08 - 19:30">Aula Presencial (Terca-Feira - 29/08 - 19:30)</option>
       </select>
 
       <div className="flex flex-col gap-2 mb-6">
