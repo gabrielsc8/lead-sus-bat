@@ -2,7 +2,7 @@ import { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "@/app/lib/prisma";
-import { JWT } from "next-auth/jwt";
+import type { JWT } from "next-auth/jwt";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -13,39 +13,62 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
-        const user = await prisma.user.findUnique({
-          where: { email: credentials?.email },
-        });
+        try {
+          // Guarda de credenciais
+          const email = credentials?.email?.trim().toLowerCase();
+          const password = credentials?.password ?? "";
 
-        if (!user || user.role !== "admin") return null;
+          if (!email || !password) return null;
 
-        const isValid = await compare(credentials!.password, user.password);
-        if (!isValid) return null;
+          // Busca usuário (garanta emails salvos em minúsculas no DB)
+          const user = await prisma.user.findUnique({
+            where: { email },
+          });
 
-        return {
-          id: user.id.toString(),
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        };
+          // Bloqueia se não existir ou não for admin
+          if (!user || user.role !== "admin") return null;
+
+          // Compara hash
+          const ok = await compare(password, user.password);
+          if (!ok) return null;
+
+          // Retorna objeto enxuto para o token
+          return {
+            id: String(user.id),
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          };
+        } catch (err) {
+          console.error("AUTH AUTHORIZE ERROR:", err);
+          return null;
+        }
       },
     }),
   ],
   session: {
     strategy: "jwt",
+    // 30 minutos
     maxAge: 30 * 60,
   },
   callbacks: {
     async jwt({ token, user }: { token: JWT; user?: any }) {
-      if (user) token.role = user.role;
+      // Propaga role para o token quando loga
+      if (user?.role) token.role = user.role;
       return token;
     },
     async session({ session, token }) {
-      if (session.user) session.user.role = token.role as string;
+      // Garante que session.user exista e adicione a role
+      if (session.user) {
+        (session.user as any).role = (token as any).role ?? undefined;
+      }
       return session;
     },
   },
-  secret: 'DU923NDU9NWUSAONSD39USI',
+
+  // Mantendo hardcoded como você pediu
+  secret: "DU923NDU9NWUSAONSD39USI",
+
   pages: {
     signIn: "/login",
   },
